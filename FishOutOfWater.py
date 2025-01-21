@@ -1,19 +1,23 @@
 import pygame
 import random
 
+
 FishColor = (226, 127, 128)
 TreeColor = (71, 48, 11)
 BackroundColor = (0, 51, 89)
 ScoreColor = (255, 255, 255)
+WaterColor = (73, 173, 255)
 
 WindowWidth = 1000
 WindowHeight = 500
-FishSize = 40
+FishWidth = 35
+FishHeight = 25
 TreeWidth = 30
-TreeGap = 120
+TreeGap = 150
 TreeSpeed = 3
-FishGravity = 0.4
-FishJump = -8
+FishGravity = 0.5
+FishJump = -17.5
+WaterHight = 50
 FPS = 60
 
 pygame.init()
@@ -33,14 +37,14 @@ class fish:
         self.y = self.y + self.speed
         if self.y < 0 :
             self.y = 0
-        if self.y > WindowHeight - FishSize:
-            self.y = WindowHeight -FishSize
+        if self.y > WindowHeight - FishHeight:
+            self.y = WindowHeight -FishHeight
     def draw (self):
-        pygame.draw.rect (Window, FishColor, (self.x, self.y, FishSize, FishSize))
+        pygame.draw.rect (Window, FishColor, (self.x, self.y, FishWidth, FishHeight))
 class trees:
     def __init__ (self):
         self.x = WindowWidth
-        self.height = random.randint (100, 300)
+        self.height = random.randint (200, 270)
         self.top = self.height
         self.bottom = self.top + TreeGap
     def TreeMove (self):
@@ -50,6 +54,7 @@ class trees:
         pygame.draw.rect (Window, TreeColor, (self.x, self.bottom, TreeWidth, WindowHeight - self.bottom))
 
 def main ():
+    global FishGravity
     Window.fill (BackroundColor)
     TitleText = font.render ("Fish Out Of Water!", True, ScoreColor)
     Window.blit (TitleText, (WindowWidth / 2 - TitleText.get_width() / 2, 200))
@@ -70,13 +75,20 @@ def main ():
     Clock = pygame.time.Clock()
 
     while ButtonPressed:
+
         Window.fill (BackroundColor)
+        pygame.draw.rect (Window, WaterColor, (0, WindowHeight - WaterHight, WindowWidth, WaterHight))
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    Player.Jump()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                Player.Jump()
+                    if Player.y == (WindowHeight - FishHeight):
+                        Player.Jump()
+                    else:
+                        Player.speed = 0
+                        FishGravity = 0.1
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_SPACE:
+                    FishGravity = 0.5
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
@@ -87,8 +99,8 @@ def main ():
                 Score += 1
                 TreeList.remove(Tree)
                 TreeList.append(trees())
-            if Player.x + FishSize > Tree.x and Player.x < Tree.x + TreeWidth:
-                if Player.y < Tree.top or Player.y + FishSize > Tree.bottom:
+            if Player.x + FishWidth > Tree.x and Player.x < Tree.x + TreeWidth:
+                if Player.y < Tree.top or Player.y + FishHeight > Tree.bottom:
                     ButtonPressed = False
         Player.draw ()
         for Tree in TreeList:
